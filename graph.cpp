@@ -93,17 +93,17 @@ int main (int argc, char ** argv) {
     }
     for(int i=(5500/5); i<(6500/5); i++) {
         gr2y->SetPoint(i-(5500/5), vx[i], va[i]);
-        gr3y->SetPoint(i, vx[i], vb[i]);
-        gr4y->SetPoint(i, vx[i], vc[i]);
-        gr5y->SetPoint(i, vx[i], vd[i]);
-        gr6y->SetPoint(i, vx[i], ve[i]);
+        gr3y->SetPoint(i-(5500/5), vx[i], vb[i]);
+        gr4y->SetPoint(i-(5500/5), vx[i], vc[i]);
+        gr5y->SetPoint(i-(5500/5), vx[i], vd[i]);
+        gr6y->SetPoint(i-(5500/5), vx[i], ve[i]);
     }
     for(int i=(6500/5); i<vx.size(); i++) {
         gr2z->SetPoint(i-(6500/5), vx[i], va[i]);
-        gr3z->SetPoint(i, vx[i], vb[i]);
-        gr4z->SetPoint(i, vx[i], vc[i]);
-        gr5z->SetPoint(i, vx[i], vd[i]);
-        gr6z->SetPoint(i, vx[i], ve[i]);
+        gr3z->SetPoint(i-(6500/5), vx[i], vb[i]);
+        gr4z->SetPoint(i-(6500/5), vx[i], vc[i]);
+        gr5z->SetPoint(i-(6500/5), vx[i], vd[i]);
+        gr6z->SetPoint(i-(6500/5), vx[i], ve[i]);
     }
     
     gr2x->SetMarkerStyle(20);
