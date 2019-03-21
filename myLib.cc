@@ -161,11 +161,12 @@ double gaus_pol2(double* x, double* par) {
   return g + p;
 }
 
-vector <double> ris (string filename) {
+vector <double> ris (string filename) { //la funzione restituisce |Ris Picco1|Err Ris1|Ris Picco2|Err Ris2|
      
     ifstream in (filename.c_str());
     if (in.good() == false) {
             cout << "Errore di apertura file" << endl;
+            exit(EXIT_FAILURE);
     }
 
     double x, a, b, c, d, e, min, max;
@@ -236,8 +237,18 @@ vector <double> ris (string filename) {
     TMatrixDSym correlation_matrix_2_2 = r2 -> GetCorrelationMatrix();*/
     
     vector <double> resolution;
-    resolution.push_back(2.35*f1->GetParameter(2)/f1->GetParameter(1));
-    resolution.push_back(2.35*f2->GetParameter(2)/f2->GetParameter(1));
+    double A = f1->GetParameter(1);
+    double B = f1->GetParameter(2);
+    double C = f2->GetParameter(1);
+    double D = f2->GetParameter(2);
+    double err_A = f1->GetParError(1);
+    double err_B = f1->GetParError(2);
+    double err_C = f2->GetParError(1);
+    double err_D = f2->GetParError(2);
+    resolution.push_back(2.35*B/A);
+    resolution.push_back(2.35*sqrt(pow(err_B/A,2)+pow((B*err_A)/(A*A),2)));
+    resolution.push_back(2.35*D/C);
+    resolution.push_back(2.35*sqrt(pow(err_D/C,2)+pow((D*err_C)/(C*C),2)));
     
     return resolution;
 }

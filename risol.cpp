@@ -23,8 +23,8 @@ using namespace std;
 
 int main () {
     
-    TGraph * g1 = new TGraph;
-    TGraph * g2 = new TGraph;
+    TGraphErrors * g1 = new TGraphErrors;
+    TGraphErrors * g2 = new TGraphErrors;
     
     g1->SetMarkerStyle(20);
     g1->SetMarkerSize(0.4);
@@ -32,8 +32,8 @@ int main () {
     g2->SetMarkerSize(0.4);
     
     string line;
-    vector <double> x,y;
     char nuovo = 'y';
+    double v;
     int i=0;
     while(true) {
         cout << "Inserire nuovi dati? (y/n)" << endl;
@@ -41,12 +41,15 @@ int main () {
         if(nuovo == 'n') break;
         cout << "Inserire file *.txt" << endl;
         cin >> line;
-        x.push_back(ris(line)[0]);
-        y.push_back(ris(line)[1]);
-        g1->SetPoint(i, 1000, x[i]);
-        g2->SetPoint(i, 1000, y[i]);
+        cout << "Inserire tensione di bias (V)" << endl;
+        cin >> v;
+        g1->SetPoint(i,v,ris(line)[0]);
+        g1->SetPointError(i,0.2,ris(line)[1]);
+        g2->SetPoint(i,v,ris(line)[2]);
+        g2->SetPointError(i,0.2,ris(line)[3]);
         i++;
-        cout << "Risoluzione 1 = " << x[0] << "\t\t" << "Risoluzione 2 = " << y[0] << endl;
+        cout << "Risoluzione 1 = " << ris(line)[0] << " +- " << ris(line)[1] << endl;
+        cout << "Risoluzione 2 = " << ris(line)[2] << " +- " << ris(line)[3] << endl;
     }
 
     TApplication* myApp = new TApplication ("myApp", NULL, NULL);
