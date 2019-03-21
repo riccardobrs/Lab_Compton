@@ -23,8 +23,6 @@ using namespace std;
 
 int main () {
     
-    TApplication* myApp = new TApplication ("myApp", NULL, NULL);
-    TCanvas* canva = new TCanvas("c2","canva",100,200,700,500);  
     TGraph * g1 = new TGraph;
     TGraph * g2 = new TGraph;
     
@@ -41,6 +39,7 @@ int main () {
         cout << "Inserire nuovi dati? (y/n)" << endl;
         cin >> nuovo;
         if(nuovo == 'n') break;
+        cout << "Inserire file *.txt" << endl;
         cin >> line;
         x.push_back(ris(line)[0]);
         y.push_back(ris(line)[1]);
@@ -49,7 +48,9 @@ int main () {
         i++;
         cout << "Risoluzione 1 = " << x[0] << "\t\t" << "Risoluzione 2 = " << y[0] << endl;
     }
-    
+
+    TApplication* myApp = new TApplication ("myApp", NULL, NULL);
+    TCanvas* canva = new TCanvas("c2","canva",100,200,700,500);
     canva->Divide(2,1);
     canva->cd(1);
     g1->Draw("AP");
