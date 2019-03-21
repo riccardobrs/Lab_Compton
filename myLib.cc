@@ -4,7 +4,7 @@
 #include <cmath>
 #include <vector>
 #include <string>
-
+#include <TMultiGraph.h>
 #include <TApplication.h>
 #include <TCanvas.h>
 #include <TStyle.h>
@@ -153,6 +153,93 @@ void Media_Pesata(std::vector <double> x, std::vector <double> err_x, double& me
   }
   media = result / Sum_weight;
   errore = sqrt ( 1. / Sum_weight );
+}
+
+double gaus_pol2(double* x, double* par) {
+  double g = par[0] * exp( - pow( (x[0] - par[1] ) ,2) / ( 2 * pow(par[2],2) ) );
+  double p = par[3]+x[0]*par[4]+x[0]*x[0]*par[5];
+  return g + p;
+}
+
+vector <double> ris (string filename) {
+     
+    ifstream in (filename.c_str());
+    if (in.good() == false) {
+            cout << "Errore di apertura file" << endl;
+    }
+
+    double x, a, b, c, d, e, min, max;
+    string line;
+    int N = 0, NBin = 1;
+    vector <double> vx, va, vb, vc, vd, ve;
+    
+    while (getline(in,line)) {
+        if ( N > 24 ) {
+            in >> x >> a >> b >> c >> d >> e;
+            if (in.eof() == true) break;
+            vx.push_back(x);
+            va.push_back(a);
+            vb.push_back(b);
+            vc.push_back(c);
+            vd.push_back(d);
+            ve.push_back(e);
+            NBin++;
+        }
+        N++;
+    }
+    in.close();
+    Max_Min(vx, min, max);
+    
+    TH1D * histo = new TH1D("nome", "nome", NBin-7, min, max);
+    
+    for(int i=0; i<vx.size(); i++) {
+        for(int j =0; j<va[i];j++) histo->Fill(vx[i]);
+        for(int j =0; j<vb[i];j++) histo->Fill(vx[i]+1);
+        for(int j =0; j<vc[i];j++) histo->Fill(vx[i]+2);
+        for(int j =0; j<vd[i];j++) histo->Fill(vx[i]+3);
+        for(int j =0; j<ve[i];j++) histo->Fill(vx[i]+4);
+    }
+
+    TF1 * f1 = new TF1 ("511_Gaus+pol2", gaus_pol2, 2000, 3600, 6);
+    f1 -> SetParameter(1,2500);
+    f1 -> SetParameter(2, 100);
+    f1 -> SetParameter(3, 1620);
+    f1 -> SetParameter(4, -0.95);
+    f1 -> SetParameter(5, 1.59e-04);
+    f1 -> SetParName (0, "Amp_{1}" );
+    f1 -> SetParName (1, "#mu_{1}" );
+    f1 -> SetParName (2, "#sigma_{1}" );
+    f1 -> SetParName (3, "a_{0}" );
+    f1 -> SetParName (4, "a_{1}" );
+    f1 -> SetParName (5, "a_{2}" );
+    f1 -> SetLineColor(kRed);
+    
+    TF1 * f2 = new TF1 ("1274_Gaus+pol2", gaus_pol2, 5500, 6500, 6);
+    f2 -> SetParameter(0,278);
+    f2 -> SetParameter(1,5943);
+    f2 -> SetParameter(2, 268);
+    f2 -> SetParName (0, "Amp_{2}" );
+    f2 -> SetParName (1, "#mu_{2}" );
+    f2 -> SetParName (2, "#sigma_{2}" );
+    f2 -> SetParName (3, "b_{0}" );
+    f2 -> SetParName (4, "b_{1}" );
+    f2 -> SetParName (5, "b_{2}" );
+    f2 -> SetLineColor(6);
+    
+    histo->Fit("511_Gaus+pol2", "R");
+    histo->Fit("1274_Gaus+pol2", "R");
+    /*TFitResultPtr r1 = histo->Fit("511_Gaus+pol2", "R S");
+    TMatrixDSym covariance_matrix_2_1 = r1 -> GetCovarianceMatrix();
+    TMatrixDSym correlation_matrix_2_1 = r1 -> GetCorrelationMatrix();
+    TFitResultPtr r2 = histo->Fit("1274_Gaus+pol2", "R S +");
+    TMatrixDSym covariance_matrix_2_2 = r2 -> GetCovarianceMatrix();
+    TMatrixDSym correlation_matrix_2_2 = r2 -> GetCorrelationMatrix();*/
+    
+    vector <double> resolution;
+    resolution.push_back(2.35*f1->GetParameter(2)/f1->GetParameter(1));
+    resolution.push_back(2.35*f2->GetParameter(2)/f2->GetParameter(1));
+    
+    return resolution;
 }
 
 
