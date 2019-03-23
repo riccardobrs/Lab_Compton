@@ -23,10 +23,10 @@ using namespace std;
 
 int main (int argc, char ** argv) {
     
-    gStyle->SetOptFit(1112);
+    //gStyle->SetOptFit(1112);
  
     TApplication* myApp = new TApplication ("myApp", NULL, NULL);
-    TCanvas* canva = new TCanvas("c2","2nd column",100,200,700,500);    
+    TCanvas* canva = new TCanvas("canva","canva",100,200,700,500);    
     
     string fileInput = argv[1];
     ifstream in (fileInput.c_str());
@@ -59,7 +59,7 @@ int main (int argc, char ** argv) {
     Max_Min(vx, min, max);
     cout << "NBIN = " << NBin << endl;
     
-    TH1D * histo = new TH1D("nome", "nome", NBin-7, min, max);
+    TH1D * histo = new TH1D("Histogram", "", NBin-7, min, max);
     
     for(int i=0; i<vx.size(); i++) {
         for(int j =0; j<va[i];j++) histo->Fill(vx[i]);

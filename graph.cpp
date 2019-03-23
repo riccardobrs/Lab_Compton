@@ -58,7 +58,7 @@ int main (int argc, char ** argv) {
     Max_Min(vx, min, max);
     cout << "NBIN = " << NBin << endl;
     
-    TH1D * histo = new TH1D("nome", "nome", NBin-7, min, max);
+    TH1D * histo = new TH1D("Histogram", "", NBin-7, min, max);
     
     for(int i=0; i<vx.size(); i++) {
         for(int j =0; j<va[i];j++) histo->Fill(vx[i]);
