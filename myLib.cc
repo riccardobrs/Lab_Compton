@@ -161,7 +161,7 @@ double gaus_pol2(double* x, double* par) {
   return g + p;
 }
 
-vector <double> ris (string filename) { //la funzione restituisce |Ris Picco1|Err Ris1|Ris Picco2|Err Ris2|
+vector <double> ris (string filename, double range []) { //la funzione restituisce |Ris Picco1|Err Ris1|Ris Picco2|Err Ris2|
      
     ifstream in (filename.c_str());
     if (in.good() == false) {
@@ -201,7 +201,7 @@ vector <double> ris (string filename) { //la funzione restituisce |Ris Picco1|Er
         for(int j =0; j<ve[i];j++) histo->Fill(vx[i]+4);
     }
 
-    TF1 * f1 = new TF1 ("511_Gaus+pol2", gaus_pol2, 2000, 3600, 6);
+    TF1 * f1 = new TF1 ("511_Gaus+pol2", gaus_pol2, range[0], range[1], 6);
     f1 -> SetParameter(1,2500);
     f1 -> SetParameter(2, 100);
     f1 -> SetParameter(3, 1620);
@@ -215,7 +215,7 @@ vector <double> ris (string filename) { //la funzione restituisce |Ris Picco1|Er
     f1 -> SetParName (5, "a_{2}" );
     f1 -> SetLineColor(kRed);
     
-    TF1 * f2 = new TF1 ("1274_Gaus+pol2", gaus_pol2, 5500, 6500, 6);
+    TF1 * f2 = new TF1 ("1274_Gaus+pol2", gaus_pol2, range[2], range[3], 6);
     f2 -> SetParameter(0,278);
     f2 -> SetParameter(1,5943);
     f2 -> SetParameter(2, 268);

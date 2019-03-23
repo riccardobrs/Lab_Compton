@@ -20,7 +20,7 @@ double Gauss(double* x, double* par);
 double Binormale(double* x,double* par);
 void Media_Pesata(std::vector <double> x,std::vector <double> err_x, double& media,double& errore);
 double gaus_pol2(double* x, double* par);
-vector <double> ris (string filename); //la funzione restituisce |Ris Picco1|Err Ris1|Ris Picco2|Err Ris2|
+vector <double> ris (string filename, double range []); //la funzione restituisce |Ris Picco1|Err Ris1|Ris Picco2|Err Ris2|
 
 #endif
 

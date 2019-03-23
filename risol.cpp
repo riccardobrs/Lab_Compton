@@ -33,7 +33,7 @@ int main () {
     
     string line;
     char nuovo = 'y';
-    double v;
+    double v, min1, max1, min2, max2;
     int i=0;
     while(true) {
         cout << "Inserire nuovi dati? (y/n)" << endl;
@@ -43,13 +43,20 @@ int main () {
         cin >> line;
         cout << "Inserire tensione di bias (V)" << endl;
         cin >> v;
-        g1->SetPoint(i,v,ris(line)[0]);
-        g1->SetPointError(i,0.2,ris(line)[1]);
-        g2->SetPoint(i,v,ris(line)[2]);
-        g2->SetPointError(i,0.2,ris(line)[3]);
+        cout << "Inserire range fit 1° picco" << endl;
+        cin >> min1;
+        cin >> max1;
+        cout << "Inserire range fit 2° picco" << endl;
+        cin >> min2;
+        cin >> max2;
+        double range [] = {min1, max1, min2, max2};
+        g1->SetPoint(i,v,ris(line, range)[0]);
+        g1->SetPointError(i,0.2,ris(line, range)[1]);
+        g2->SetPoint(i,v,ris(line, range)[2]);
+        g2->SetPointError(i,0.2,ris(line, range)[3]);
         i++;
-        cout << "Risoluzione 1 = " << ris(line)[0] << " +- " << ris(line)[1] << endl;
-        cout << "Risoluzione 2 = " << ris(line)[2] << " +- " << ris(line)[3] << endl;
+        cout << "Risoluzione 1 = " << ris(line, range)[0] << " +- " << ris(line, range)[1] << endl;
+        cout << "Risoluzione 2 = " << ris(line, range)[2] << " +- " << ris(line, range)[3] << endl;
     }
 
     TApplication* myApp = new TApplication ("myApp", NULL, NULL);

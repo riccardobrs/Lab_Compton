@@ -34,7 +34,7 @@ int main (int argc, char ** argv) {
             cout << "Errore di apertura file" << endl;
             return 1;
     }
-    ofstream outfile ("fitResult_"+fileInput);
+//    ofstream outfile ("fitResult_"+fileInput);
     
     double x, a, b, c, d, e, min, max;
     string line;
@@ -68,7 +68,7 @@ int main (int argc, char ** argv) {
         for(int j =0; j<vd[i];j++) histo->Fill(vx[i]+3);
         for(int j =0; j<ve[i];j++) histo->Fill(vx[i]+4);
     }
-    
+/*    
     TF1 * f1 = new TF1 ("511_Gaus+pol2", gaus_pol2, 1800, 3128, 6);
     f1 -> SetParameter(1,2500);
     f1 -> SetParameter(2, 100);
@@ -94,9 +94,10 @@ int main (int argc, char ** argv) {
     f2 -> SetParName (4, "b_{1}" );
     f2 -> SetParName (5, "b_{2}" );
     f2 -> SetLineColor(6);
-      
+*/      
     canva->cd();
     histo->Draw();
+/*
     TFitResultPtr r1 = histo->Fit("511_Gaus+pol2", "R S");
     TMatrixDSym covariance_matrix_1 = r1 -> GetCovarianceMatrix();
     TMatrixDSym correlation_matrix_1 = r1 -> GetCorrelationMatrix();
@@ -172,7 +173,7 @@ int main (int argc, char ** argv) {
     outfile << "p-value = " << f1->GetProb() << endl;	
 
     outfile << "** STIMA PARAMETRI**" << endl;
-    outfile << "Amp_{1} = " << f1 -> GetParameter(0) << " +- " << f1 -> GetParError(0) << endl;
+    outfile << "Amp    //ofstream outfile ("fitResult_"+fileInput);_{1} = " << f1 -> GetParameter(0) << " +- " << f1 -> GetParError(0) << endl;
     outfile << "#mu_{1} = " << f1 -> GetParameter(1) << " +- " << f1 -> GetParError(1) << endl;
     outfile << "#sigma_{1} = " << f1 -> GetParameter(2) << " +- " << f1 -> GetParError(2) << endl;
     outfile << "a_{0} = " << f1 -> GetParameter(3) << " +- " << f1 -> GetParError(3) << endl;
@@ -193,7 +194,7 @@ int main (int argc, char ** argv) {
     outfile << "b_{0} = " << f2 -> GetParameter(3) << " +- " << f2 -> GetParError(3) << endl;
     outfile << "b_{1} = " << f2 -> GetParameter(4) << " +- " << f2 -> GetParError(4) << endl;
     outfile << "b_{2} = " << f2 -> GetParameter(5) << " +- " << f2 -> GetParError(5) << endl;
-    
+*/
     myApp -> Run();  
     
     return 0;
