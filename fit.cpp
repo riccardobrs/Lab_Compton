@@ -1,3 +1,23 @@
+/*
+    ./fit <nome_del_file_dati>.Txt
+    
+    Il programma necessita inoltre la presenza di un file "fitset.txt" che contiene i set per fit
+    
+    Organizzazione di fitset.txt
+    
+    | <nome_del_file_dati>.Txt | mu1 | min1 | max 1 | mu2 | min2 | max2 |
+    
+    Spiegazione variabili
+    
+    mu1 = media primo picco
+    min1 = min del range di fit primo picco
+    max2 = max del range di fit primo picco
+    mu2, min2, max2 analoghi per il secondo picco
+    
+    Il programma salva di default gli istogrammi fittati in formato png. Tuttavia viene aperta
+    anche una TApplication per eventuali modifiche ad hoc.
+*/
+
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -37,7 +57,7 @@ int main (int argc, char ** argv) {
 //    ofstream outfile ("fitResult_"+fileInput);
     
     double x, a, b, c, d, e, min, max;
-    string line;
+    string line, txtdata;
     int N = 0, NBin = 1;
     vector <double> vx, va, vb, vc, vd, ve;
     
@@ -71,18 +91,18 @@ int main (int argc, char ** argv) {
     
     double mu1, mu2, min1, min2, max1, max2;
     
-    cout << "Set mu1: ";
-    cin >> mu1;
-    cout << "Set range 1" << endl << "min : ";
-    cin >> min1;
-    cout << "max: ";
-    cin >> max1;
-    cout << "Set mu2: ";
-    cin >> mu2;
-    cout << "Set range 2" << endl << "min : ";
-    cin >> min2;
-    cout << "max: ";
-    cin >> max2;
+    string fileSet = "fitset.txt";
+    ifstream fs(fileSet.c_str());
+    if (fs.good() == false) {
+            cout << "Errore di apertura file" << endl;
+            return 1;
+    }
+    while(true) {
+        fs >> txtdata >> mu1 >> min1 >> max1 >> mu2 >> min2 >> max2;
+        if(fs.eof() == true) break;
+        if(txtdata.compare(fileInput) == 0) break;
+    }
+    fs.close();
     
     TF1 * f1 = new TF1 ("511_Gaus+pol2", gaus_pol2, min1, max1, 6);
     f1 -> SetParameter(1,mu1);
@@ -112,7 +132,14 @@ int main (int argc, char ** argv) {
       
     canva->cd();
     histo->Draw();
-
+    string file_in;
+    const char * argv1_name;
+    if(fileInput.size() == 19)
+        file_in = fileInput.replace(15, 4, ".png");
+    else
+        file_in = fileInput.replace(14, 4, ".png");
+    argv1_name = file_in.c_str();
+    
     TFitResultPtr r1 = histo->Fit("511_Gaus+pol2", "R S");
     TMatrixDSym covariance_matrix_1 = r1 -> GetCovarianceMatrix();
     TMatrixDSym correlation_matrix_1 = r1 -> GetCorrelationMatrix();
@@ -210,7 +237,8 @@ int main (int argc, char ** argv) {
     outfile << "b_{1} = " << f2 -> GetParameter(4) << " +- " << f2 -> GetParError(4) << endl;
     outfile << "b_{2} = " << f2 -> GetParameter(5) << " +- " << f2 -> GetParError(5) << endl;
 */
-    myApp -> Run();  
+    canva->Print(argv1_name, "png");
+    myApp -> Run();
     
     return 0;
 

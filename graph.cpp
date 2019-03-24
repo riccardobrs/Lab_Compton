@@ -1,3 +1,22 @@
+/*
+    ./graph <nome_del_file_dati>.Txt
+    
+    Il programma serve a visualizzare l'andamento degli spettri di energia
+    per dedurre dei valori adatti per il SetParameter della media e per i
+    range di fit dei picchi.
+    
+    Scrivere i valori dedotti in un file "fitset.txt" così organizzato:
+    
+    | <nome_del_file_dati>.Txt | mu1 | min1 | max 1 | mu2 | min2 | max2 |
+    
+    Spiegazione variabili
+    
+    mu1 = media primo picco
+    min1 = min del range di fit primo picco
+    max2 = max del range di fit primo picco
+    mu2, min2, max2 analoghi per il secondo picco
+*/
+
 #include <iostream>
 #include <fstream>
 #include <iomanip>
