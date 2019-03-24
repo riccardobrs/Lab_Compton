@@ -1,9 +1,9 @@
 /*
     ./fit <nome_del_file_dati>.Txt
     
-    Il programma necessita inoltre la presenza di un file "fitset.txt" che contiene i set per fit
+    Il programma necessita inoltre la presenza di un file "fitset2.txt" che contiene i set per fit
     
-    Organizzazione di fitset.txt
+    Organizzazione di fitset2.txt
     
     | <nome_del_file_dati>.Txt | mu1 | min1 | max 1 | mu2 | min2 | max2 |
     
@@ -16,6 +16,11 @@
     
     Il programma salva di default gli istogrammi fittati in formato png. Tuttavia viene aperta
     anche una TApplication per eventuali modifiche ad hoc.
+    
+    Inoltre aggiorna il contenuto di un file "resolutions.txt" da passare come argv[1] di "risol.cpp"
+    NB: il file "resolutions.txt" DEVE essere già esistente nella cartella, perché oltre ad essere aperto
+    in modalità scrittura, viene aperto anche in modalità lettura. Alla prima esecuzione di fit.cpp dovrà
+    quindi essere creato il file di testo vuoto.
 */
 
 #include <iostream>
@@ -91,7 +96,7 @@ int main (int argc, char ** argv) {
     
     double mu1, mu2, min1, min2, max1, max2;
     
-    string fileSet = "fitset.txt";
+    string fileSet = "fitset2.txt";
     ifstream fs(fileSet.c_str());
     if (fs.good() == false) {
             cout << "Errore di apertura file" << endl;
@@ -134,10 +139,16 @@ int main (int argc, char ** argv) {
     histo->Draw();
     string file_in;
     const char * argv1_name;
-    if(fileInput.size() == 19)
+    double v_bias;
+    double v_bias_err = 0.2; // errore fissato "a mano"
+    if(fileInput.size() == 19) {
         file_in = fileInput.replace(15, 4, ".png");
-    else
+        v_bias = stoi(fileInput.replace(4, 15, ""));
+    }
+    else {
         file_in = fileInput.replace(14, 4, ".png");
+        v_bias = stoi(fileInput.replace(3, 15, ""));
+    }
     argv1_name = file_in.c_str();
     
     TFitResultPtr r1 = histo->Fit("511_Gaus+pol2", "R S");
@@ -146,6 +157,38 @@ int main (int argc, char ** argv) {
     TFitResultPtr r2 = histo->Fit("1274_Gaus+pol2", "R S +");
     TMatrixDSym covariance_matrix_2 = r2 -> GetCovarianceMatrix();
     TMatrixDSym correlation_matrix_2 = r2 -> GetCorrelationMatrix();
+    
+    double res1 = (2.35*f1->GetParameter(2)) / (f1->GetParameter(1));
+    double res2 = (2.35*f2->GetParameter(2)) / (f2->GetParameter(1));
+    double res1_err = 2.35 * sqrt(pow(f1->GetParError(2)/f1->GetParameter(1),2)+pow(f1->GetParError(1)*f1->GetParameter(2)/pow(f1->GetParameter(1),2),2));
+    double res2_err = 2.35 * sqrt(pow(f2->GetParError(2)/f2->GetParameter(1),2)+pow(f2->GetParError(1)*f2->GetParameter(2)/pow(f2->GetParameter(1),2),2));
+    
+/*
+    Aggiungo ad un file "resolutions.txt" delle righe così costruite:
+    
+    |V_bias|V_bias_err|Risoluz_picco1|Risoluz_picco1_err|Risoluz_picco2|Risoluz_picco2_err|
+*/
+
+    string resolutions = "resolutions.txt";
+    bool notwrite = false;
+    double o1, o2, o3, o4, o5, o6;
+    
+    fstream out_in (resolutions.c_str(), ios::in); //apro il file in modalità input (lettura)
+    if (out_in.good() == false) {
+            cout << "File 'resolutions.txt' inesistente o corrotto" << endl;
+            return 1;
+    }
+    while(true) {
+        out_in >> o1 >> o2 >> o3 >> o4 >> o5 >> o6;
+        if(o1==v_bias && o2==v_bias_err && o3==res1 && o4==res1_err && o5==res2 && o6==res2_err)
+            notwrite = true; //se è già presente non va scritto nuovamente
+        if(out_in.eof() == true) break;
+    }
+    out_in.close();
+    fstream out_app (resolutions.c_str(), ios::app); //apro il file in modalità append (scrittura: aggiungo righe alle preesistenti)
+    if(notwrite == false)
+        out_app << v_bias << "\t" << v_bias_err << "\t" << res1 << "\t" << res1_err << "\t" << res2 << "\t" << res2_err << endl;
+    out_app.close();
 /*
     outfile << "\nMatrice di covarianza 1° PICCO" << endl;
     for (int i = 0; i < 6; i++) {

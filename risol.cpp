@@ -1,8 +1,15 @@
 /*
-    ./risol fitset.txt
+    ./risol resolutions.txt
     
     Il programma apre una TApplication con 2 TGraphErrors che mostrano
     l'andamento della risoluzione (calcolata per i 2 picchi) in dipendenza dalla V_bias.
+    
+    NB è necessario come argv[1] "resolutions.txt", che aggiornato con i nuovi parametri stimati
+    ad ogni esecuzione di "fit.cpp"
+    
+    "resolutions.txt" è così strutturato:
+    
+    |V_bias|V_bias_err|Risoluz_picco1|Risoluz_picco1_err|Risoluz_picco2|Risoluz_picco2_err|
 */
 
 #include <iostream>
@@ -30,13 +37,6 @@ using namespace std;
 
 int main (int argc, char ** argv) { //inserire come argv[1] il file dei set per i fit
 
-    string fileSet = argv[1];
-    ifstream in (fileSet.c_str());
-    if (in.good() == false) {
-            cout << "Errore di apertura file" << endl;
-            return 1;
-    }
-    
     TGraphErrors * g1 = new TGraphErrors;
     TGraphErrors * g2 = new TGraphErrors;
     
@@ -45,51 +45,34 @@ int main (int argc, char ** argv) { //inserire come argv[1] il file dei set per 
     g1->SetMarkerColor(kBlue);
     g1->GetXaxis()->SetTitle("V_{bias} (V)");
     g1->GetYaxis()->SetTitle("Resolution");
+    
     g2->SetMarkerStyle(20);
     g2->SetMarkerSize(0.7);
     g2->SetMarkerColor(kRed);
     g2->GetXaxis()->SetTitle("V_{bias} (V)");
     g2->GetYaxis()->SetTitle("Resolution");
     
-    string line, nometxt;
-    char nuovo = 'y';
-    double v, mu1, min1, max1, mu2, min2, max2;
-    double range [6];
-    int i=0;
-           
-    while(true) {
-        
-        cout << "Inserire nuovi dati? (y/n)" << endl;
-        cin >> nuovo;
-        if(nuovo == 'n') break;
-        cout << "Inserire file *.txt" << endl;
-        cin >> line;
-        cout << "Inserire tensione di bias (V)" << endl;
-        cin >> v;
-        
-        while(true) {
-            in >> nometxt >> mu1 >> min1 >> max1 >> mu2 >> min2 >> max2;
-            if(in.eof() == true) break;
-            if (nometxt.compare(fileSet) == 0) break;
-        }
-        in.close();
-        
-        range[0] = mu1;
-        range[1] = min1;
-        range[2] = max1;
-        range[3] = mu2;
-        range[4] = min2;
-        range[5] = max2;
-        
-        g1->SetPoint(i,v,ris(line, range)[0]);
-        g1->SetPointError(i,0.2,ris(line, range)[1]);
-        g2->SetPoint(i,v,ris(line, range)[2]);
-        g2->SetPointError(i,0.2,ris(line, range)[3]);
-        i++;
-        cout << "Risoluzione 1 = " << ris(line, range)[0] << " +- " << ris(line, range)[1] << endl;
-        cout << "Risoluzione 2 = " << ris(line, range)[2] << " +- " << ris(line, range)[3] << endl;
-    }
+    double v_bias, v_bias_err, res1, res1_err, res2, res2_err;
+    int i = 0;
     
+    string inputFile = argv[1];
+    ifstream in (inputFile.c_str());
+    if (in.good() == false) {
+            cout << "Errore di apertura file" << endl;
+            return 1;
+    }
+                  
+    while(true) {
+        in >> v_bias >> v_bias_err >> res1 >> res1_err >> res2 >> res2_err;
+        if(in.eof() == true) break;
+        g1->SetPoint(i, v_bias, res1);
+        g1->SetPointError(i, v_bias_err, res1_err);
+        g2->SetPoint(i, v_bias, res2);
+        g2->SetPointError(i, v_bias_err, res2_err);
+        i++;
+    }
+    in.close();
+
     TApplication* myApp = new TApplication ("myApp", NULL, NULL);
     TCanvas* canva = new TCanvas("c2","canva",100,200,700,500);
     canva->Divide(2,1);
