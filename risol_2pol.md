@@ -1,6 +1,8 @@
 # Risoluzione scintillatore da 2''
 ## Set media dei picchi e range di fit
 
+I seguenti set sono salvati nel file "fitset.txt" adeguato alla lettura da parte dei programmi.
+
 * Osservazione: sarebbe meglio incrementare il numero di eventi
 
 ### 450V_amp500.150
