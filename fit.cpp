@@ -180,9 +180,8 @@ int main (int argc, char ** argv) {
     }
     while(true) {
         out_in >> o1 >> o2 >> o3 >> o4 >> o5 >> o6;
-        if(o1==v_bias && o2==v_bias_err && o3==res1 && o4==res1_err && o5==res2 && o6==res2_err)
-            notwrite = true; //se è già presente non va scritto nuovamente
         if(out_in.eof() == true) break;
+        if(o1==v_bias) notwrite = true; //se è già presente non va scritto nuovamente
     }
     out_in.close();
     fstream out_app (resolutions.c_str(), ios::app); //apro il file in modalità append (scrittura: aggiungo righe alle preesistenti)
