@@ -1,5 +1,5 @@
 /*
-    ./risol fileset.txt
+    ./risol fitset.txt
     
     Il programma apre una TApplication con 2 TGraphErrors che mostrano
     l'andamento della risoluzione (calcolata per i 2 picchi) in dipendenza dalla V_bias.
@@ -41,9 +41,15 @@ int main (int argc, char ** argv) { //inserire come argv[1] il file dei set per 
     TGraphErrors * g2 = new TGraphErrors;
     
     g1->SetMarkerStyle(20);
-    g1->SetMarkerSize(0.4);
+    g1->SetMarkerSize(0.7);
+    g1->SetMarkerColor(kBlue);
+    g1->GetXaxis()->SetTitle("V_{bias} (V)");
+    g1->GetYaxis()->SetTitle("Resolution");
     g2->SetMarkerStyle(20);
-    g2->SetMarkerSize(0.4);
+    g2->SetMarkerSize(0.7);
+    g2->SetMarkerColor(kRed);
+    g2->GetXaxis()->SetTitle("V_{bias} (V)");
+    g2->GetYaxis()->SetTitle("Resolution");
     
     string line, nometxt;
     char nuovo = 'y';
@@ -83,7 +89,7 @@ int main (int argc, char ** argv) { //inserire come argv[1] il file dei set per 
         cout << "Risoluzione 1 = " << ris(line, range)[0] << " +- " << ris(line, range)[1] << endl;
         cout << "Risoluzione 2 = " << ris(line, range)[2] << " +- " << ris(line, range)[3] << endl;
     }
-
+    
     TApplication* myApp = new TApplication ("myApp", NULL, NULL);
     TCanvas* canva = new TCanvas("c2","canva",100,200,700,500);
     canva->Divide(2,1);
