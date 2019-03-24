@@ -45,12 +45,14 @@ int main (int argc, char ** argv) { //inserire come argv[1] il file dei set per 
     g1->SetMarkerColor(kBlue);
     g1->GetXaxis()->SetTitle("V_{bias} (V)");
     g1->GetYaxis()->SetTitle("Resolution");
+    g1->GetYaxis()->SetTitleOffset(1.57);
     
     g2->SetMarkerStyle(20);
     g2->SetMarkerSize(0.7);
     g2->SetMarkerColor(kRed);
     g2->GetXaxis()->SetTitle("V_{bias} (V)");
     g2->GetYaxis()->SetTitle("Resolution");
+    g2->GetYaxis()->SetTitleOffset(1.57);
     
     double v_bias, v_bias_err, res1, res1_err, res2, res2_err;
     int i = 0;
