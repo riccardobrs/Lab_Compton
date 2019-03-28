@@ -1,5 +1,5 @@
 /*
-    ./fit <nome_del_file_dati>.Txt
+    ./fitST <nome_del_file_dati>.Txt
     
     Il programma necessita inoltre la presenza di un file "fitsetST2.txt" che contiene i set per fit
     
