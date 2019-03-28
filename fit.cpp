@@ -141,7 +141,7 @@ int main (int argc, char ** argv) {
     const char * argv1_name;
     double v_bias;
     double v_bias_err = 0.2; // errore fissato "a mano"
-    file_in = fileInput.replace(16, 4, ".png");
+    file_in = fileInput.replace(16, 4, ".png"); //il primo numero è la posizione dell'ultimo "." ---> modificare se necessario
     if(fileInput[0]==0) {
         string fileInput2 = fileInput;
         fileInput.clear();
