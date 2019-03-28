@@ -4,7 +4,7 @@
     Il programma apre una TApplication con 2 TGraphErrors che mostrano
     l'andamento della risoluzione (calcolata per i 2 picchi) in dipendenza dalla V_bias.
     
-    NB è necessario come argv[1] "resolutions.txt", che aggiornato con i nuovi parametri stimati
+    NB è necessario come argv[1] "resolutions.txt", che viene aggiornato con i nuovi parametri stimati
     ad ogni esecuzione di "fit.cpp"
     
     "resolutions.txt" è così strutturato:
@@ -69,8 +69,10 @@ int main (int argc, char ** argv) { //inserire come argv[1] il file dei set per 
         if(in.eof() == true) break;
         g1->SetPoint(i, v_bias, res1);
         g1->SetPointError(i, v_bias_err, res1_err);
-        g2->SetPoint(i, v_bias, res2);
-        g2->SetPointError(i, v_bias_err, res2_err);
+        if(v_bias != 1050 && v_bias != 1100) {
+            g2->SetPoint(i, v_bias, res2);
+            g2->SetPointError(i, v_bias_err, res2_err);
+        }
         i++;
     }
     in.close();

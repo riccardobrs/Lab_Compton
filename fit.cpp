@@ -141,14 +141,16 @@ int main (int argc, char ** argv) {
     const char * argv1_name;
     double v_bias;
     double v_bias_err = 0.2; // errore fissato "a mano"
-    if(fileInput.size() == 19) {
-        file_in = fileInput.replace(15, 4, ".png");
+    file_in = fileInput.replace(16, 4, ".png");
+    if(fileInput[0]==0) {
+        string fileInput2 = fileInput;
+        fileInput.clear();
+        for(int j=0; j<3; j++)
+            fileInput[j]=fileInput2[j+1];
+        v_bias = stoi(fileInput);
+    }
+    else
         v_bias = stoi(fileInput.replace(4, 15, ""));
-    }
-    else {
-        file_in = fileInput.replace(14, 4, ".png");
-        v_bias = stoi(fileInput.replace(3, 15, ""));
-    }
     argv1_name = file_in.c_str();
     
     TFitResultPtr r1 = histo->Fit("511_Gaus+pol2", "R S");
