@@ -77,7 +77,7 @@ vector <TPaveStats *> create_pave (TH1D * h1, TH1D * h2, int num) { //Creo un bo
 int main (int argc, char ** argv) {
     
     gStyle->SetOptFit(1112);
-    gStyle->SetOptStat(0);
+    gStyle->SetOptStat(11); //print only name of histogram and number of entries
  
     TApplication* myApp = new TApplication ("myApp", NULL, NULL);
     TCanvas* canva;
@@ -94,7 +94,7 @@ int main (int argc, char ** argv) {
             return 1;
     }
     
-//    ofstream outfile ("fitResult_"+fileInput);
+//ofstream outfile ("fitResult_"+fileInput);
 
     //Dichiarazione variabili
     string datitxt, line, txtdata;
@@ -177,7 +177,6 @@ int main (int argc, char ** argv) {
         f1 -> SetLineColor(kRed);
         
         TF1 * f2 = new TF1 ("1274_Gaus+pol2", gaus_pol2, min2, max2, 6);
-        //f2 -> SetParameter(0,278);
         f2 -> SetParameter(1,mu2);
         f2 -> SetParameter(2, 268);
         f2 -> SetParName (0, "Amp_{2}" );
@@ -205,13 +204,13 @@ int main (int argc, char ** argv) {
         argv1_name = file_in.c_str();
         
         histo2 = (TH1D *)histo -> Clone("2^{o} picco");
+        //histo2->SetFillColorAlpha(kBlue, 0.35);
         
         TFitResultPtr r1 = histo->Fit("511_Gaus+pol2", "R S", "sames");
         TMatrixDSym covariance_matrix_1 = r1 -> GetCovarianceMatrix();
         TMatrixDSym correlation_matrix_1 = r1 -> GetCorrelationMatrix();
         
         canva->Update();
-        //histo2 = (TH1D *)histo -> Clone("2^{o} picco");
         
         TFitResultPtr r2 = histo2->Fit("1274_Gaus+pol2", "R S +", "sames");
         TMatrixDSym covariance_matrix_2 = r2 -> GetCovarianceMatrix();
@@ -219,8 +218,6 @@ int main (int argc, char ** argv) {
         f1->Draw("same");
         
         canva->Update();
-        //pave = create_pave(histo, histo2, numero)[0];
-        //pave2 = create_pave(histo, histo2, numero)[1];
         vpave = create_pave(histo, histo2, numero);
         pave = vpave[0];
         pave2 = vpave[1];
@@ -347,6 +344,7 @@ int main (int argc, char ** argv) {
     outfile << "b_{2} = " << f2 -> GetParameter(5) << " +- " << f2 -> GetParError(5) << endl;
 */
         canva->Print(argv1_name, "png");
+        
         //svuotamento dei vector
         vx.clear();
         va.clear();
