@@ -77,12 +77,15 @@ vector <TPaveStats *> create_pave (TH1D * h1, TH1D * h2, int num) { //Creo un bo
 int main (int argc, char ** argv) {
     
     gStyle->SetOptFit(1112);
+    gStyle->SetOptStat(0);
  
     TApplication* myApp = new TApplication ("myApp", NULL, NULL);
     TCanvas* canva;
     TH1D * histo;
     TH1D * histo2; //utilizzato successivamente per creare doppie box statistiche
     TPaveStats * pave;
+    TPaveStats * pave2;
+    vector <TPaveStats *> vpave;
     
     string fileInput = argv[1];
     ifstream infile (fileInput.c_str());
@@ -201,19 +204,26 @@ int main (int argc, char ** argv) {
         }
         argv1_name = file_in.c_str();
         
+        histo2 = (TH1D *)histo -> Clone("2^{o} picco");
+        
         TFitResultPtr r1 = histo->Fit("511_Gaus+pol2", "R S", "sames");
         TMatrixDSym covariance_matrix_1 = r1 -> GetCovarianceMatrix();
         TMatrixDSym correlation_matrix_1 = r1 -> GetCorrelationMatrix();
         
         canva->Update();
-        histo2 = (TH1D *)histo -> Clone("2^{o} picco");
+        //histo2 = (TH1D *)histo -> Clone("2^{o} picco");
         
         TFitResultPtr r2 = histo2->Fit("1274_Gaus+pol2", "R S +", "sames");
         TMatrixDSym covariance_matrix_2 = r2 -> GetCovarianceMatrix();
         TMatrixDSym correlation_matrix_2 = r2 -> GetCorrelationMatrix();
+        f1->Draw("same");
         
         canva->Update();
-        pave = create_pave(histo, histo2, numero)[0];
+        //pave = create_pave(histo, histo2, numero)[0];
+        //pave2 = create_pave(histo, histo2, numero)[1];
+        vpave = create_pave(histo, histo2, numero);
+        pave = vpave[0];
+        pave2 = vpave[1];
         
         cov1 = covariance_matrix_1(1,2);
         cov2 = covariance_matrix_2(1,2); 
@@ -344,6 +354,7 @@ int main (int argc, char ** argv) {
         vc.clear();
         vd.clear();
         ve.clear();
+        vpave.clear();
         numero++;
     }
     infile.close();
