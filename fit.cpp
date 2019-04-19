@@ -97,7 +97,7 @@ int main (int argc, char ** argv) {
 //ofstream outfile ("fitResult_"+fileInput);
 
     //Dichiarazione variabili
-    string datitxt, line, txtdata;
+    string datitxt, line, txtdata, macro;
     double n1, n2, n3, n4, n5, n6;
     double x, a, b, c, d, e, min, max;
     vector <double> vx, va, vb, vc, vd, ve;
@@ -105,6 +105,7 @@ int main (int argc, char ** argv) {
     double mu1, mu2, min1, min2, max1, max2;
     string fileSet, file_in;
     const char * argv1_name;
+    const char *  macro_name;
     double v_bias;
     double v_bias_err = 0.2; // errore fissato "a mano"
     double cov1, cov2, res1, res2, res1_err, res2_err;
@@ -149,7 +150,7 @@ int main (int argc, char ** argv) {
             for(int j =0; j<ve[i];j++) histo->Fill(vx[i]+4);
         }
         
-        fileSet = "fitset2.txt";
+        fileSet = argv[1];
         ifstream fs(fileSet.c_str());
         if (fs.good() == false) {
                 cout << "Errore di apertura file" << endl;
@@ -191,6 +192,7 @@ int main (int argc, char ** argv) {
         canva->cd();
         histo->Draw();
         file_in = datitxt.replace(16, 4, ".png"); //il primo numero è la posizione dell'ultimo "." ---> modificare se necessario
+        macro = datitxt.replace(16, 4, ".root");
         if(datitxt[0]==0) {
             string fileInput2 = datitxt;
             datitxt.clear();
@@ -344,6 +346,9 @@ int main (int argc, char ** argv) {
     outfile << "b_{2} = " << f2 -> GetParameter(5) << " +- " << f2 -> GetParError(5) << endl;
 */
         canva->Print(argv1_name, "png");
+        macro_name = (macro).c_str();
+        canva->SaveAs(macro_name);
+        
         
         //svuotamento dei vector
         vx.clear();
