@@ -190,6 +190,10 @@ int main (int argc, char ** argv) {
         
         canva = create_canva(numero);
         canva->cd();
+        histo->GetXaxis()->SetTitle("Channel");
+        histo->GetYaxis()->SetTitle("Events");
+        //histo->SetFillColor(kBlue);
+        //histo->SetFillStyle(3001);
         histo->Draw();
         file_in = datitxt.replace(16, 4, ".png"); //il primo numero è la posizione dell'ultimo "." ---> modificare se necessario
         macro = datitxt.replace(16, 4, ".root");
