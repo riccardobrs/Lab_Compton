@@ -30,7 +30,14 @@ int main (int argc, char ** argv) {
     double ang_solido_1 = num/den;
     double ang_solido_1_err = sqrt(pow((num_err/den),2)+pow((num*den_err/(den*den)),2));
     
+    double eff_ass_1 = eff_1*ang_solido_1;
+    double eff_ass_1_err = sqrt(pow((eff_1*ang_solido_1_err),2)+pow((eff_1_err*ang_solido_1),2));
+    double eff_ass_2 = eff_2*ang_solido_1;
+    double eff_ass_2_err = sqrt(pow((eff_2*ang_solido_1_err),2)+pow((eff_2_err*ang_solido_1),2));
+    
     cout << "(Angolo solido 1pol / 4pi) = " << ang_solido_1 << " +- " << ang_solido_1_err << endl;
+    cout << "Efficienza assoluta riv 1 18cm = " << eff_ass_1 << " +- " << eff_ass_1_err << endl;
+    cout << "Efficienza assoluta riv 2 36cm = " << eff_ass_2 << " +- " << eff_ass_2_err << endl;
     
     return 0;
 
