@@ -35,6 +35,9 @@ int main (int argc, char ** argv) {
     double eff_ass_2 = eff_2*ang_solido_1;
     double eff_ass_2_err = sqrt(pow((eff_2*ang_solido_1_err),2)+pow((eff_2_err*ang_solido_1),2));
     
+    
+    cout << "Efficienza intrinseca 1 " << eff_1 << " +- " << eff_1_err << endl;
+    cout << "Efficienza intrinseca 2 " << eff_2 << " +- " << eff_2_err << endl;
     cout << "(Angolo solido 1pol / 4pi) = " << ang_solido_1 << " +- " << ang_solido_1_err << endl;
     cout << "Efficienza assoluta riv 1 18cm = " << eff_ass_1 << " +- " << eff_ass_1_err << endl;
     cout << "Efficienza assoluta riv 2 36cm = " << eff_ass_2 << " +- " << eff_ass_2_err << endl;
