@@ -3,14 +3,14 @@
     
     Organizzazione di fitset2.txt
     
-    | <nome_del_file_dati>.Txt | mu1 | min1 | max 1 | mu2 | min2 | max2 |
+    | <nome_del_file_dati>.Txt | mu1 | min1 | max 1 | reb | min2 | max2 |
     
     Spiegazione variabili
     
     mu1 = media primo picco
     min1 = min del range di fit primo picco
     max2 = max del range di fit primo picco
-    mu2, min2, max2 analoghi per il secondo picco
+    reb, min2, max2 analoghi per il secondo picco
     
     Il programma salva di default gli istogrammi fittati in formato png. Tuttavia viene aperta
     anche una TApplication per eventuali modifiche ad hoc.
@@ -41,6 +41,7 @@
 #include <TLatex.h>
 #include <TMath.h>
 #include <TH1D.h>
+#include <TFile.h>
 #include <TMatrixDSym.h>
 #include <TPaveStats.h>
 #include "myLib.h"
@@ -53,7 +54,7 @@ TCanvas * create_canva (int num) {
 }
 
 TH1D * create_histo (int num, int nbin, double min, double max) {
-    TH1D * h = new TH1D ("1^{o} picco", "", nbin, min, max);
+    TH1D * h = new TH1D ("Picco ambientale", "", nbin, min, max);
     return h;
 }
 
@@ -83,9 +84,6 @@ int main (int argc, char ** argv) {
     TCanvas* canva;
     TH1D * histo;
     TH1D * histo2; //utilizzato successivamente per creare doppie box statistiche
-    TPaveStats * pave;
-    TPaveStats * pave2;
-    vector <TPaveStats *> vpave;
     
     string fileInput = argv[1];
     ifstream infile (fileInput.c_str());
@@ -94,27 +92,47 @@ int main (int argc, char ** argv) {
             return 1;
     }
     
-//ofstream outfile ("fitResult_"+fileInput);
+    ofstream outfile ("gauss-fondo_"+fileInput);
 
     //Dichiarazione variabili
     string datitxt, line, txtdata, macro;
-    double n1, n2, n3, n4, n5, n6;
+    double n1, n2, n3, n4, n5;
     double x, a, b, c, d, e, min, max;
     vector <double> vx, va, vb, vc, vd, ve;
     int N, NBin, numero = 1;
-    double mu1, mu2, min1, min2, max1, max2;
-    string fileSet, file_in;
+    double mu1, reb, min1, max1, livetime;
+    string fileSet, file_in, inp_file, fitfun;
     const char * argv1_name;
     const char *  macro_name;
     double v_bias;
     double v_bias_err = 0.2; // errore fissato "a mano"
-    double cov1, cov2, res1, res2, res1_err, res2_err;
+    double cov1, cov2, res1, res1_err, cov;
     bool notwrite;
     double o1, o2, o3, o4, o5, o6;
     string resolutions = "resolutions2.txt";
+    double ming, maxg;
+    double Amp, Sig, NEv, Rate;
+    double Amp_err, Sig_err, NEv_err, Rate_err;
+    
+    double A, K, effin_2, theta, nn;
+    double A_err, effin_2_err, nn_err;
+    double K_err = 0.00001;
+    double theta_err = 6.;
+    double effin_1 = 0.196;//0.0905353;
+    double effin_1_err = 0.001;//0.000132296;
+    double eff_2E = 0.39;//0.180115;
+    double eff_2E_err = 0.01;//0.000265647;
+    double NN = 11340*(6.02214076e+23)*82/207.2;
+    double ang_1 = 0.5*(1-cos(atan(0.0254/(2*0.18))));
+    double ang_2 = 0.5*(1-cos(atan(0.0254/(0.26))));
+    double ang_1_err = sin(atan(0.0254/(2*0.18)))*0.5*0.005*0.18*0.18*(0.0254/2)/(0.18*0.18*(0.18*0.18+pow((0.0254/2),2)));
+    double ang_2_err = sin(atan(0.0254/(0.26)))*0.5*0.005*0.26*0.26*0.0254/(0.26*0.26*(0.26*0.26+pow((0.0254),2)));
+    double urto, urto_err;
+    
+    
     
     while(true) { //lettura di fitset.txt
-        infile >> datitxt >> n1 >> n2 >> n3 >> n4 >> n5 >> n6;
+        infile >> datitxt >> n1 >> n2 >> n3 >> n4 >> n5;
         if (infile.eof() == true) break;
         ifstream in (datitxt.c_str());
     
@@ -157,18 +175,19 @@ int main (int argc, char ** argv) {
                 return 1;
         }
         while(true) {
-            fs >> txtdata >> mu1 >> min1 >> max1 >> mu2 >> min2 >> max2;
+            fs >> txtdata >> mu1 >> min1 >> max1 >> reb >> livetime;
             if(fs.eof() == true) break;
             if(txtdata.compare(datitxt) == 0) break;
         }
         fs.close();
-        
-        TF1 * f1 = new TF1 ("511_Gaus+pol2", gaus_pol2, min1, max1, 6);
+    
+        fitfun = "511_Gaus+pol2";
+        TF1 * f1 = new TF1 (fitfun.c_str(), gaus_pol2, min1, max1, 6);
         f1 -> SetParameter(1,mu1);
-        f1 -> SetParameter(2, 100);
-        f1 -> SetParameter(3, 1620);
-        f1 -> SetParameter(4, -0.95);
-        f1 -> SetParameter(5, 1.59e-04);
+        f1 -> SetParameter(2, 150);
+        //f1 -> SetParameter(3, 1620);
+        //f1 -> SetParameter(4, -0.95);
+        //f1 -> SetParameter(5, 1.59e-04);
         f1 -> SetParName (0, "Amp_{1}" );
         f1 -> SetParName (1, "#mu_{1}" );
         f1 -> SetParName (2, "#sigma_{1}" );
@@ -176,27 +195,46 @@ int main (int argc, char ** argv) {
         f1 -> SetParName (4, "a_{1}" );
         f1 -> SetParName (5, "a_{2}" );
         f1 -> SetLineColor(kRed);
+        /*if(txtdata=="030_sorg039_1.Txt") {
+            cout << "****************************************" << endl;
+            f1->SetParameter(0,250);
+            f1->SetParameter(3,50/(2000*2000));
+            f1->SetParameter(4,-8000*50/(2000*2000));
+            f1->SetParameter(5,4000*4000*50/(2000*2000));
+        }*/
         
-        TF1 * f2 = new TF1 ("1274_Gaus+pol2", gaus_pol2, min2, max2, 6);
-        f2 -> SetParameter(1,mu2);
-        f2 -> SetParameter(2, 268);
-        f2 -> SetParName (0, "Amp_{2}" );
-        f2 -> SetParName (1, "#mu_{2}" );
-        f2 -> SetParName (2, "#sigma_{2}" );
-        f2 -> SetParName (3, "b_{0}" );
-        f2 -> SetParName (4, "b_{1}" );
-        f2 -> SetParName (5, "b_{2}" );
-        f2 -> SetLineColor(6);
-        
+
+
+        /*fitfun = "crystalball";
+        TF1 * f1 = new TF1 (fitfun.c_str(), crystal, min1, max1, 6);
+        f1 -> SetParameter(1,mu1);
+        //f1 -> SetParameter(2, 100);
+        //f1 -> SetParameter(3, 1620);
+        //f1 -> SetParameter(4, -0.95);
+        //f1 -> SetParameter(5, 1.59e-04);
+        f1 -> SetParName (0, "Amp_{1}" );
+        f1 -> SetParName (1, "#mu_{1}" );
+        f1 -> SetParName (2, "#sigma_{1}" );
+        f1 -> SetParName (3, "a_{0}" );
+        f1 -> SetParName (4, "a_{1}" );
+        f1 -> SetParName (5, "a_{2}" );
+        f1 -> SetLineColor(kRed);*/
+                    
         canva = create_canva(numero);
         canva->cd();
         histo->GetXaxis()->SetTitle("Channel");
         histo->GetYaxis()->SetTitle("Events");
         //histo->SetFillColor(kBlue);
         //histo->SetFillStyle(3001);
+
+        inp_file = datitxt;
+        file_in = datitxt.replace(13, 4, ".png"); //il primo numero è la posizione dell'ultimo "." ---> modificare se necessario
+        macro = datitxt.replace(13, 4, ".root");
+        TFile * rootf = new TFile(macro.c_str(), "RECREATE");
+        
+        histo->Rebin(reb);
         histo->Draw();
-        file_in = datitxt.replace(16, 4, ".png"); //il primo numero è la posizione dell'ultimo "." ---> modificare se necessario
-        macro = datitxt.replace(16, 4, ".root");
+        /*
         if(datitxt[0]==0) {
             string fileInput2 = datitxt;
             datitxt.clear();
@@ -207,33 +245,22 @@ int main (int argc, char ** argv) {
         else {
             v_bias = stoi(datitxt.replace(4, 15, ""));
         }
+        */
+        v_bias = 000;
         argv1_name = file_in.c_str();
-        
-        histo2 = (TH1D *)histo -> Clone("2^{o} picco");
-        //histo2->SetFillColorAlpha(kBlue, 0.35);
-        
-        TFitResultPtr r1 = histo->Fit("511_Gaus+pol2", "R S", "sames");
+                
+        TFitResultPtr r1 = histo->Fit(fitfun.c_str(), "R S", "sames");
         TMatrixDSym covariance_matrix_1 = r1 -> GetCovarianceMatrix();
         TMatrixDSym correlation_matrix_1 = r1 -> GetCorrelationMatrix();
         
         canva->Update();
         
-        TFitResultPtr r2 = histo2->Fit("1274_Gaus+pol2", "R S +", "sames");
-        TMatrixDSym covariance_matrix_2 = r2 -> GetCovarianceMatrix();
-        TMatrixDSym correlation_matrix_2 = r2 -> GetCorrelationMatrix();
-        f1->Draw("same");
-        
-        canva->Update();
-        vpave = create_pave(histo, histo2, numero);
-        pave = vpave[0];
-        pave2 = vpave[1];
         
         cov1 = covariance_matrix_1(1,2);
-        cov2 = covariance_matrix_2(1,2); 
         res1 = (2.35*f1->GetParameter(2)) / (f1->GetParameter(1));
-        res2 = (2.35*f2->GetParameter(2)) / (f2->GetParameter(1));
+    
         res1_err = 2.35 * sqrt(pow(f1->GetParError(2)/f1->GetParameter(1),2)+pow(f1->GetParError(1)*f1->GetParameter(2)/pow(f1->GetParameter(1),2),2)+(2/f1->GetParameter(1))*(f1->GetParameter(2)/pow(f1->GetParameter(1),2))*cov1);
-        res2_err = 2.35 * sqrt(pow(f2->GetParError(2)/f2->GetParameter(1),2)+pow(f2->GetParError(1)*f2->GetParameter(2)/pow(f2->GetParameter(1),2),2)+(2/f2->GetParameter(1))*(f2->GetParameter(2)/pow(f2->GetParameter(1),2))*cov2);
+      
         
     /*
         Aggiungo ad un file "resolutions2.txt" delle righe così costruite:
@@ -256,7 +283,7 @@ int main (int argc, char ** argv) {
         out_in.close();
         fstream out_app (resolutions.c_str(), ios::app); //apro il file in modalità append (scrittura: aggiungo righe alle preesistenti)
         if(notwrite == false)
-            out_app << v_bias << "\t" << v_bias_err << "\t" << res1 << "\t" << res1_err << "\t" << res2 << "\t" << res2_err << endl;
+        //out_app << v_bias << "\t" << v_bias_err << "\t" << res1 << "\t" << res1_err << "\t" << res2 << "\t" << res2_err << endl;
         out_app.close();
 /*
     outfile << "\nMatrice di covarianza 1° PICCO" << endl;
@@ -349,11 +376,116 @@ int main (int argc, char ** argv) {
     outfile << "b_{1} = " << f2 -> GetParameter(4) << " +- " << f2 -> GetParError(4) << endl;
     outfile << "b_{2} = " << f2 -> GetParameter(5) << " +- " << f2 -> GetParError(5) << endl;
 */
+        
+        ming = f1->GetParameter(1)-5*f1->GetParameter(2);
+        maxg = f1->GetParameter(1)+5*f1->GetParameter(2);
+        TF1 * fb = new TF1("fb", gaussian, ming, maxg, 3);
+        Amp = f1->GetParameter(0);
+        Sig = f1->GetParameter(2);
+        Amp_err = f1->GetParError(0);
+        Sig_err = f1->GetParError(2);
+        fb -> SetParameter(0,Amp);
+        fb -> SetParameter(1, f1->GetParameter(1));
+        fb -> SetParameter(2, Sig);
+        fb->SetLineColor(kGreen+1);
+        //fb->Draw("same");
+        cov = covariance_matrix_1(0,2);
+        NEv = sqrt(2*M_PI) * Amp * Sig;
+        NEv_err = sqrt(2*M_PI*(pow(Amp*Sig_err,2)+pow(Sig*Amp_err,2)+2*Amp*Sig*cov));
+        cout << inp_file << endl;
+        Rate = NEv/livetime;
+        Rate_err = NEv_err/livetime;
+        
+        //Rate = 0.001;
+        
+        if(inp_file == "000_sorgBoh_1.Txt") {
+            theta = 0;
+            A = 66702;
+            A_err = 189;
+            effin_2 = eff_2E * 1.;
+            effin_2_err = eff_2E_err * 1.;
+            K = 0.00165;
+            nn = 2*A*effin_1*ang_1;
+            nn_err = 2*sqrt( pow(effin_1_err*ang_1,2)+pow(effin_1*ang_1_err,2));
+        }
+        else if(inp_file == "030_sorg039_1.Txt") {
+            theta = 30;
+            A = 66702;
+            A_err = 189;
+            effin_2 = eff_2E * 1.1;
+            effin_2_err = eff_2E_err * 1.1;
+            K = 0.00159;
+            nn = 2*A*effin_1*ang_1;
+            nn_err = 2*sqrt( pow(effin_1_err*ang_1,2)+pow(effin_1*ang_1_err,2));
+        }
+        else if(inp_file == "045_arancio_1.Txt") {
+            theta = 45;
+            A = 428025;
+            A_err = 85605;
+            effin_2 = eff_2E * 1.16;
+            effin_2_err = eff_2E_err * 1.16;
+            K = 0.00149;
+            nn = 2*A*effin_1*ang_1;
+            nn_err = 2*sqrt( pow(effin_1_err*ang_1,2)+pow(effin_1*ang_1_err,2));
+        }
+        else if(inp_file == "060_arancio_2.Txt") {
+            theta = 60;
+            A = 428025;
+            A_err = 85605;
+            effin_2 = eff_2E * 1.27;
+            effin_2_err = eff_2E_err * 1.27;
+            K = 0.00131;
+            nn = 2*A*effin_1*ang_1;
+            nn_err = 2*sqrt( pow(effin_1_err*ang_1,2)+pow(effin_1*ang_1_err,2));
+        }
+        else if(inp_file == "075_arancio_2.Txt") {
+            theta = 75;
+            A = 428025;
+            A_err = 85605;
+            effin_2 = eff_2E * 1.38;
+            effin_2_err = eff_2E_err * 1.38;
+            K = 0.00111;
+            nn = 2*A*effin_1*ang_1;
+            nn_err = 2*sqrt( pow(effin_1_err*ang_1,2)+pow(effin_1*ang_1_err,2));
+        }
+        else if(inp_file == "130_arancio_1.Txt") {
+            theta = 130;
+            A = 428025;
+            A_err = 85605;
+            effin_2 = eff_2E * 1.58;
+            effin_2_err = eff_2E_err * 1.58;
+            K = 0.00075;
+            nn = 2*A*effin_1*ang_1;
+            nn_err = 2*sqrt( pow(effin_1_err*ang_1,2)+pow(effin_1*ang_1_err,2));
+        }
+        
+        //Rate= 0.001;
+        //if (inp_file == "030_sorg039_1.Txt") {
+            //Rate = 0.10132617;
+            //Rate_err = 0.0042282;
+        //}
+        urto = Rate/(nn*NN*ang_2*4*M_PI*effin_2*K);
+        urto_err = sqrt(pow(Rate_err/(nn*NN*ang_2*4*M_PI*effin_2*K),2)+pow(Rate*nn_err/(nn*nn*NN*ang_2*4*M_PI*effin_2*K),2)+pow(Rate*ang_2_err/(nn*NN*ang_2*ang_2*4*M_PI*effin_2*K),2)+pow(Rate*effin_2_err/(nn*NN*ang_2*4*M_PI*effin_2*effin_2*K),2)+pow(Rate*K_err/(nn*NN*ang_2*4*M_PI*effin_2*K*K),2));
+
+        cout << "FOTONI RIVELATI = " << NEv << " +- " << NEv_err << endl;
+        cout << "RATE = " << Rate << " +- " << Rate_err << endl;
+        outfile << "*****************************************" << endl; 
+        outfile << "FOTONI RIVELATI = " << NEv << " +- " << NEv_err << endl;
+        outfile << "RATE = " << Rate << " +- " << Rate_err << endl;
+        outfile << "PARAMETRI gauss" << endl;
+        outfile << inp_file << endl << "Amp = " << Amp << " +- " << Amp_err << endl;
+        outfile << "Mean = " << f1->GetParameter(1) << " +- " << f1->GetParError(1) << endl;
+        outfile << "Sigma = " << Sig << " +- " << Sig_err << endl;
+        outfile << "Sez urto = " << urto << " +- " << urto_err << endl;
+        outfile << "*****************************************" << endl << endl;
+        
         canva->Print(argv1_name, "png");
         macro_name = (macro).c_str();
-        canva->SaveAs(macro_name);
-        
-        
+        //canva->SaveAs(macro_name);
+        histo->Write();
+        rootf->Close();
+
+               
         //svuotamento dei vector
         vx.clear();
         va.clear();
@@ -361,8 +493,8 @@ int main (int argc, char ** argv) {
         vc.clear();
         vd.clear();
         ve.clear();
-        vpave.clear();
         numero++;
+        
     }
     infile.close();
     myApp -> Run();

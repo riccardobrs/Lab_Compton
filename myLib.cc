@@ -161,6 +161,29 @@ double gaus_pol2(double* x, double* par) {
   return g + p;
 }
 
+double gaus_pol1(double* x, double* par) {
+  double g = par[0] * exp( - pow( (x[0] - par[1] ) ,2) / ( 2 * pow(par[2],2) ) );
+  double r = par[3]+x[0]*par[4];
+  return g + r;
+}
+
+double gaussian (double* x, double* par) {
+  double g = par[0] * exp( - pow( (x[0] - par[1] ) ,2) / ( 2 * pow(par[2],2) ) );
+  return g;
+}
+
+double gaus2 (double* x, double* par) {
+  double g1 = par[0] * exp( - pow( (x[0] - par[1] ) ,2) / ( 2 * pow(par[2],2) ) );
+  double g2 = par[3] * exp( - pow( (x[0] - par[4] ) ,2) / ( 2 * pow(par[5],2) ) );
+  return g1+g2;
+}
+
+double crystal(double* x, double* par) {
+    double g = par[0] * exp( - pow( (x[0] - par[1] ) ,2) / ( 2 * pow(par[2],2) ) );
+    double e = par[3] * exp(par[4]*x[0]) + par[5];
+    return g+e;
+}
+
 vector <double> ris (string filename, double fileset []) { //la funzione restituisce |Ris Picco1|Err Ris1|Ris Picco2|Err Ris2|
      
     ifstream in (filename.c_str());
